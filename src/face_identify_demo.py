@@ -118,8 +118,8 @@ class FaceIdentify(object):
             if len(face_imgs) > 0:
                 start_time = time.time()
                 features_faces = self.predict(face_imgs)
-                duration = duration + time.time() - start_time
-                count = count + 1
+                duration += time.time() - start_time
+                count += 1
                 predicted_names = [self.identify_face(
                     features_face) for features_face in features_faces]
 
@@ -129,16 +129,16 @@ class FaceIdentify(object):
                 self.draw_label(img, (x, y), label)
 
             cv2.imshow('Faces', img)
-            
+
             if cv2.waitKey(5) == 27:  # ESC key press
                 break
 
         video_capture.release()
         cv2.destroyAllWindows()
 
-        print(f"All predictions duration: {duration} secs")
-        print(f"Predictions: {count}")
-        print(f"Avg. prediction time (secs): {duration / count}")        
+        print(f"Total prediction duration: {duration} secs")
+        print(f"Predicted times: {count}")
+        print(f"Avg. prediction time (secs): {duration / count}")
 
 
 def box_with_margin(img, box, margin: int = 20):
