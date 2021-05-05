@@ -1,0 +1,15 @@
+# mtcnn
+# numpy
+tensorflow
+matplotlib
+opencv-python
+pandas
+ipykernel
+sklearn
+ray
+bs4
+keras_vggface
+keras_applications
+click
+seaborn
+scipy
