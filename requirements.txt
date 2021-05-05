@@ -1,6 +1,4 @@
-# mtcnn
-# numpy
-tensorflow
+tensorflow==2.2.0
 matplotlib
 opencv-python
 pandas

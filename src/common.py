@@ -21,18 +21,18 @@ def bool_or_fail(arg):
         raise IOError(f"argument is not a boolean type: {arg}")
 
 
-def crop_img(box: Tuple[int, int, int, int], img, required_size):
+def crop_img(box: Tuple[int, int, int, int], img, required_size, dtype=None):
     x, y, width, height = box
     y_right = min(y + height, img.shape[0])
     x_bottom = min(x + width, img.shape[1])
-
+    
     cropped_img = img[max(y, 0):y_right,
                       max(x, 0):x_bottom]
 
     image = Image.fromarray(cropped_img)
     resized = image.resize(required_size)
-    as_array = np.asarray(resized)
-
+    as_array = np.asarray(resized, dtype)
+    
     return as_array, cropped_img
 
 

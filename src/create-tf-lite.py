@@ -6,7 +6,10 @@ import tensorflow as tf
 
 def store_as_tflite(filename, model):
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
-    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_LATENCY]
+    converter.target_spec.supported_types = [tf.float16]
+    converter.inference_input_type = tf.float16
+    converter.inference_output_type = tf.float16
     tflite_model = converter.convert()
 
     with open(filename, "wb") as file:

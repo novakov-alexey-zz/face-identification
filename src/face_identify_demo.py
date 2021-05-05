@@ -4,10 +4,11 @@ from keras import layers
 from keras.layers import Input
 from keras.preprocessing import image
 from keras_vggface.vggface import VGGFace
-from common import IMAGE_HEIGHT, IMAGE_WIDTH, crop_img, load_pickle
+from common import IMAGE_HEIGHT, IMAGE_WIDTH, crop_img, load_pickle, COLOR_CHANNELS
 from keras_vggface import utils
 from pathlib import Path
 
+import tensorflow as tf
 import numpy as np
 import scipy.spatial as spatial
 import cv2
@@ -27,7 +28,7 @@ class FaceIdentify(object):
     def __init__(self, precompute_features_file: Path):
         self.face_height = IMAGE_HEIGHT
         self.face_width = IMAGE_WIDTH
-        self.color_channels = 3
+        self.color_channels = COLOR_CHANNELS
         self.precompute_features_map = load_pickle(precompute_features_file)
         print(f"shape: {self.precompute_features_map[0]['features'].shape}")
         print("[_] Loading VGG Face model...")
@@ -37,6 +38,8 @@ class FaceIdentify(object):
                                           self.face_width, self.color_channels),
                              pooling='avg')
         print("[x] Loading VGG Face model done")
+        self.interpreter = tf.lite.Interpreter(
+            model_path="./data/vgg_face.tflite")
 
     @classmethod
     def draw_label(cls, image, point, label, font=cv2.FONT_HERSHEY_SIMPLEX,
@@ -61,31 +64,49 @@ class FaceIdentify(object):
         else:
             return "?"
 
+    def predict(self, input: np.ndarray):
+        return self.model.predict(input)
+
+    def lite_predict(self, input: np.ndarray):
+        input_details = self.interpreter.get_input_details()
+        output_details = self.interpreter.get_output_details()
+
+        self.interpreter.resize_tensor_input(
+            input_details[0]['index'], tuple(input.shape))
+
+        _, *tail = output_details[0]['shape']
+        batch_size = input.shape[0]
+        output_shape = tuple([batch_size] + tail)
+        self.interpreter.resize_tensor_input(
+            output_details[0]['index'], output_shape)
+
+        assert input.dtype == input_details[0][
+            'dtype'], f"expected {input_details[0]['dtype']}, but input was {input.dtype}"
+
+        self.interpreter.allocate_tensors()
+        self.interpreter.set_tensor(input_details[0]['index'], input)
+        self.interpreter.invoke()
+        model_predictions = self.interpreter.get_tensor(
+            output_details[0]['index'])
+        return model_predictions
+
     def detect_face(self):
         frontal_face_cascade = cv2.CascadeClassifier(self.CV2_CASCADE_FRONTAL)
-        profile_face_cascade = cv2.CascadeClassifier(self.CV2_CASCADE_PROFILE)
-        video_capture = cv2.VideoCapture(0)  # defaul video device
+        # profile_face_cascade = cv2.CascadeClassifier(self.CV2_CASCADE_PROFILE)
+        video_capture = cv2.VideoCapture(0)
         count = 0
         duration = 0
 
         while True:
             _, img = video_capture.read()
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            start_time = time.time()
-            faces = list(frontal_face_cascade.detectMultiScale(
+            faces = frontal_face_cascade.detectMultiScale(
                 gray,
                 scaleFactor=1.2,
-                minNeighbors=5
-            ))
-            # faces = faces + list(profile_face_cascade.detectMultiScale(
-            #     gray,
-            #     scaleFactor=1.2,
-            #     minNeighbors=5
-            # ))
-            duration = duration + time.time() - start_time
-            count = count + 1
+                minNeighbors=3
+            )
             face_imgs = np.empty(
-                (len(faces), self.face_height, self.face_width, self.color_channels))
+                (len(faces), self.face_height, self.face_width, self.color_channels), np.float32)
 
             for i, face in enumerate(faces):
                 face_array, _ = crop_img(
@@ -95,7 +116,10 @@ class FaceIdentify(object):
                 face_imgs[i, :, :, :] = face_array
 
             if len(face_imgs) > 0:
-                features_faces = self.model.predict(face_imgs)
+                start_time = time.time()
+                features_faces = self.predict(face_imgs)
+                duration = duration + time.time() - start_time
+                count = count + 1
                 predicted_names = [self.identify_face(
                     features_face) for features_face in features_faces]
 
@@ -105,15 +129,16 @@ class FaceIdentify(object):
                 self.draw_label(img, (x, y), label)
 
             cv2.imshow('Faces', img)
-
+            
             if cv2.waitKey(5) == 27:  # ESC key press
                 break
 
         video_capture.release()
         cv2.destroyAllWindows()
-        print(f"{duration}")
-        print(f"{count}")
-        print(f"{duration / count}")
+
+        print(f"All predictions duration: {duration} secs")
+        print(f"Predictions: {count}")
+        print(f"Avg. prediction time (secs): {duration / count}")        
 
 
 def box_with_margin(img, box, margin: int = 20):

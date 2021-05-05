@@ -46,14 +46,16 @@ class LiteModel(BaseModel):
         return (self.interpreter.get_input_details(), self.interpreter.get_output_details())
 
     def print_details(self):
-        input,  output = self._int_out()
+        input = self.interpreter.get_input_details()
+        output = self.interpreter.get_output_details()
         print("Input Shape:", input[0]['shape'])
         print("Input Type:", input[0]['dtype'])
         print("Output Shape:", output[0]['shape'])
         print("Output Type:", output[0]['dtype'])
 
     def predict(self, input: np.ndarray) -> np.ndarray:
-        input_details, output_details = self._int_out()
+        input_details = self.interpreter.get_input_details()
+        output_details = self.interpreter.get_output_details()
 
         self.interpreter.resize_tensor_input(
             input_details[0]['index'], tuple(input.shape))
@@ -106,7 +108,7 @@ def cal_mean_feature(image_folder: Path, model: BaseModel):
 
 def extract():
     FACE_IMAGES_FOLDER = Path("./dataset-family")
-    model = LiteModel(Path("./data/vgg_face.tflite"))
+    model = FullModel()#Path("./data/vgg_face.tflite")
     model.print_details()
 
     precompute_features = []
@@ -122,5 +124,5 @@ def extract():
                 precompute_features)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':    
     extract()
