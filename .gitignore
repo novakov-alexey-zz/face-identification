@@ -18,3 +18,6 @@ model_colab
 *.pickle
 .env
 data/
+project
+.bloop
+target

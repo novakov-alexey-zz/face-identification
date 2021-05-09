@@ -40,6 +40,8 @@ def cal_mean_feature(image_folder: Path, model: Model):
         fvecs.append(batch_fvecs)
 
     fvecs = reduce(lambda a, b:  np.append(a, b, axis=0), fvecs)
+    print(image_folder)
+    print(np.array(fvecs))
     return np.array(fvecs).sum(axis=0) / len(fvecs)
 
 
@@ -57,7 +59,8 @@ def extract():
         mean_features = cal_mean_feature(label, model)
         precompute_features.append(
             {"name": label.name, "features": mean_features})
-
+    print(precompute_features[0]['name'])
+    print(np.sort(precompute_features[0]['features']))
     save_pickle(Path("./data/precompute_features.pickle"),
                 precompute_features)
 

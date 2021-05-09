@@ -28,3 +28,9 @@ test:
 
 prepare-data:
 	python3 face_detection_operation.py "dataset-family-collected" "dataset-family-small"
+
+# 2021-05-08 11:19:07,923 - INFO - Model inputs: ['input_1:0']
+# 2021-05-08 11:19:07,923 - INFO - Model outputs: ['global_average_pooling2d']
+save-2-onnx:
+	python3 src/convert.py saved-model --output-path model_vggface
+	python3 -m tf2onnx.convert --saved-model model_vggface --output data/vggface_model.onnx --tag serve	 	

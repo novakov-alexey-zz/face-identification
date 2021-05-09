@@ -11,3 +11,4 @@ keras_applications
 click
 seaborn
 scipy
+tf2onnx
