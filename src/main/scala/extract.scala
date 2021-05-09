@@ -1,17 +1,15 @@
-import java.nio.file.{Files, Paths}
-import org.emergentorder.compiletime.*
-import org.emergentorder.onnx.backends.*
 import io.kjaer.compiletime.*
-import org.emergentorder.onnx.Tensors.*
-import scala.collection.parallel.CollectionConverters.*
-import java.io.ByteArrayOutputStream
-import javax.imageio.ImageIO
-import java.io.File
-
 import org.bytedeco.javacpp.indexer.UByteIndexer
-import org.bytedeco.opencv.opencv_core.Mat 
 import org.bytedeco.opencv.global.opencv_imgcodecs.*
-import org.bytedeco.javacpp.indexer.UByteIndexer
+import org.bytedeco.opencv.opencv_core.Mat
+import org.emergentorder.compiletime.*
+import org.emergentorder.onnx.Tensors.*
+import org.emergentorder.onnx.backends.*
+
+import java.io.{ByteArrayOutputStream, File}
+import java.nio.file.{Files, Paths}
+import javax.imageio.ImageIO
+import scala.collection.parallel.CollectionConverters.*
 
 val shape =                    1     #:     224      #:    224    #: 3     #: SNil
 val tensorShapeDenotation = "Batch" ##: "Height" ##: "Width" ##: "Channel" ##: TSNil
@@ -38,23 +36,24 @@ def getModel =
   val bytes = Files.readAllBytes(Paths.get("data", "model.onnx"))
   ORTModelBackend(bytes)
 
+lazy val model = getModel
+
+def label2Features(dirs: Array[File]) = dirs.par.map { dir =>
+  println(s"Extractting features for '${dir.getName}' at $dir folder")
+  val features = for f <- dir.listFiles yield
+    println(f)
+    val image = toArray(imread(f.toString))
+    val input = Tensor(image, tensorDenotation, tensorShapeDenotation, shape)
+    val out = model.fullModel[Float, "ImageNetClassification", "Batch" ##: "Features" ##: TSNil, 1 #: 512 #: SNil](Tuple(input))
+    out.data
+  dir.getName -> features
+}
+
 @main
 def extract =
   val dirs = Paths.get("dataset-family").toFile.listFiles
-  val model = getModel
 
-  def label2Features = dirs.par.map { dir =>
-    println(s"Extractting features for '${dir.getName}' at $dir folder")
-    val features = for f <- dir.listFiles yield
-      println(f)
-      val image = toArray(imread(f.toString))      
-      val input = Tensor(image, tensorDenotation, tensorShapeDenotation, shape)
-      val out = model.fullModel[Float, "ImageNetClassification", "Batch" ##: "Features" ##: TSNil, 1 #: 512 #: SNil](Tuple(input))
-      out.data
-    dir.getName -> features
-  }
-
-  val avgFeatures = label2Features.par.map {
+  val avgFeatures = label2Features(dirs).par.map {
     (label, features) => 
       val count = features.length
       val sum = features.reduce((a, b) => a.zip(b).map(_ + _))

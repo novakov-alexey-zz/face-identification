@@ -8,14 +8,10 @@ import java.awt.event.KeyEvent
 import javax.swing.{JFrame, WindowConstants}
 import java.nio.ByteBuffer
 import org.bytedeco.opencv.opencv_core.{Mat, Size, UMat, RectVector, Rect, Point, Scalar}
-import org.bytedeco.opencv.opencv_imgproc.*
 import org.bytedeco.opencv.global.opencv_core.*
 import org.bytedeco.opencv.global.opencv_imgproc.*
 import org.bytedeco.opencv.global.opencv_imgcodecs.*
-import org.bytedeco.opencv.global.opencv_highgui.*
 import org.bytedeco.opencv.opencv_videoio.*
-import org.bytedeco.opencv.global.opencv_videoio.*
-import org.bytedeco.javacpp.indexer.UByteIndexer
 import org.bytedeco.javacv.{CanvasFrame, OpenCVFrameConverter}
 import scala.collection.mutable.ArrayBuffer
 import org.bytedeco.opencv.opencv_objdetect.*
@@ -24,8 +20,6 @@ import org.bytedeco.opencv.opencv_objdetect.*
 def demo() =            
   val faceCascade = CascadeClassifier("cv2_cascades/haarcascades/haarcascade_frontalface_alt2.xml")
   val capture = VideoCapture(0)
-  // capture.set(CAP_PROP_FRAME_WIDTH, 1280)
-  // capture.set(CAP_PROP_FRAME_HEIGHT, 720)
   val canvasFrame = CanvasFrame("Detected Faces")
   canvasFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
   canvasFrame.setCanvasSize(1280, 720)
@@ -49,8 +43,7 @@ def demo() =
           Scalar(0, 255, 0, 1)
         )
         val rectCrop = Rect(f.x, f.y, f.width, f.height)
-        val cropped = Mat(frame, rectCrop)
-        //println(toIntArray(cropped).mkString(","))
+        val cropped = Mat(frame, rectCrop)       
               
       canvasFrame.showImage(converter.convert(frame))                              
   finally
