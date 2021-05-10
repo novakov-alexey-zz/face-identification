@@ -5,6 +5,7 @@ import org.bytedeco.opencv.opencv_core.Mat
 import org.emergentorder.compiletime.*
 import org.emergentorder.onnx.Tensors.*
 import org.emergentorder.onnx.backends.*
+import io.bullet.borer.Cbor
 
 import java.io.{ByteArrayOutputStream, File}
 import java.nio.file.{Files, Paths}
@@ -38,16 +39,18 @@ def getModel =
 
 lazy val model = getModel
 
-def label2Features(dirs: Array[File]) = dirs.par.map { dir =>
-  println(s"Extractting features for '${dir.getName}' at $dir folder")
-  val features = for f <- dir.listFiles yield
-    println(f)
-    val image = toArray(imread(f.toString))
-    val input = Tensor(image, tensorDenotation, tensorShapeDenotation, shape)
-    val out = model.fullModel[Float, "ImageNetClassification", "Batch" ##: "Features" ##: TSNil, 1 #: 512 #: SNil](Tuple(input))
-    out.data
-  dir.getName -> features
-}
+def label2Features(dirs: Array[File]) = 
+  dirs.par.map { dir =>
+    val label = dir.getName
+    println(s"Extractting features for '$label' at $dir folder")
+    val features = for f <- dir.listFiles yield
+      println(f)
+      val image = toArray(imread(f.toString))
+      val input = Tensor(image, tensorDenotation, tensorShapeDenotation, shape)
+      val out = model.fullModel[Float, "ImageNetClassification", "Batch" ##: "Features" ##: TSNil, 1 #: 512 #: SNil](Tuple(input))
+      out.data
+    label -> features
+  }
 
 @main
 def extract =
@@ -58,11 +61,13 @@ def extract =
       val count = features.length
       val sum = features.reduce((a, b) => a.zip(b).map(_ + _))
       label -> sum.map(_ / count)
-  }.toMap
+  }.toList.toMap
 
   avgFeatures.foreach { (k, v) => 
     println(s"$k: ${v.sorted.mkString(",")}")
   }
 
+  val file = File("data/precomputed_features.cbor")
+  Cbor.encode(avgFeatures).to(file).result
   
 
