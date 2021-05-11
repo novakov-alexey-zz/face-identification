@@ -13,21 +13,21 @@ import scala.collection.parallel.CollectionConverters.*
 
 
 def label2Features(dirs: Array[File]) = 
-  val model = getModel
-  val batchSize = 32
-  val outputSize = 512
+  val model = getModel  
+  val batchSize = 16
+  val outputSize: Dimension = 512
 
   dirs.par.map { dir =>
     val label = dir.getName
     println(s"Extractting features for '$label' at $dir folder")
 
-    val groups = dir.listFiles.grouped(batchSize).filter(_.length == batchSize)
+    val groups = dir.listFiles.grouped(batchSize)
     val features = groups.map { files =>
       val images = files.map(f => toArray(imread(f.toString))).flatten
-      val batch = files.length
-      println(s"batch size: $batch, files: ${files.mkString(",")}")
-      val input = Tensor(images, tensorDenotation, tensorShapeDenotation, shape(batch))           
-      val out = model.fullModel[Float, "ImageClassification", "Batch" ##: "Features" ##: TSNil, 32 #: 512 #: SNil](Tuple(input))
+      val currentBatch: Dimension = files.length.asInstanceOf[Dimension]      
+      println(s"batch size: $currentBatch, files: ${files.mkString(",")}")
+      val input = Tensor(images, tensorDenotation, tensorShapeDenotation, shape(currentBatch))           
+      val out = model.fullModel[Float, "ImageClassification", "Batch" ##: "Features" ##: TSNil, currentBatch.type #: outputSize.type #: SNil](Tuple(input))
       println(s"out size: ${out.data.length}")
       out.data.grouped(outputSize).toList
     }  
@@ -41,14 +41,10 @@ def extract =
   val avgFeatures = label2Features(dirs).par.map {
     (label, features) => 
       val count = features.length
-      println(s"label = $label, count = $count")
+      println(s"label = $label, files count = $count")
       val sum = features.reduce((a, b) => a.zip(b).map(_ + _))
       label -> sum.map(_ / count)
   }.toList.toMap
-
-  // avgFeatures.foreach { (k, v) => 
-  //   println(s"label = $k, size = ${v.length}, values = ${v.sorted.mkString(",")}")
-  // }
 
   val file = File("data/precomputed_features.cbor")
   Cbor.encode(avgFeatures).to(file).result
