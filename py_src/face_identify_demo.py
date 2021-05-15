@@ -5,7 +5,6 @@ from keras.layers import Input
 from keras.preprocessing import image
 from keras_vggface.vggface import VGGFace
 from common import IMAGE_HEIGHT, IMAGE_WIDTH, crop_img, load_pickle, COLOR_CHANNELS
-from keras_vggface import utils
 from pathlib import Path
 
 import tensorflow as tf

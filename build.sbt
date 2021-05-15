@@ -19,7 +19,7 @@ scalacOptions ++= Seq(
 )
 
 fork := true
-javaOptions ++= Seq(
-  "-Dsun.java2d.opengl=True",
-  "-Dsun.java2d.xrender=True"
-)
+ javaOptions ++= Seq(
+   "-Dsun.java2d.opengl=True",
+   "-Dsun.java2d.xrender=True"
+ )
