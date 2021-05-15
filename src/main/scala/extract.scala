@@ -12,7 +12,7 @@ import javax.imageio.ImageIO
 import scala.collection.parallel.CollectionConverters.*
 
 def label2Features(dirs: Array[File]) = 
-  val model = getModel  
+  lazy val model = getModel()
   val batchSize = 16
 
   dirs.par.map { dir =>
@@ -22,11 +22,11 @@ def label2Features(dirs: Array[File]) =
     val groups = dir.listFiles.grouped(batchSize)
     val features = groups.map { files =>
       val images = files.map(f => toArray(scale(imread(f.toString)))).flatten
-      val currentBatch: Dimension = files.length.asInstanceOf[Dimension]      
+      val currentBatch = files.length.asInstanceOf[Dimension]
       println(s"batch size: $currentBatch, files: ${files.mkString(",")}")
       val out = predict(images, model, currentBatch)
       println(s"out size: ${out.data.length}")
-      out.data.grouped(outputSize).toList
+      out.data.grouped(OutputSize).toList
     }  
     label -> features.toList.flatten
   }
@@ -35,7 +35,7 @@ def label2Features(dirs: Array[File]) =
 def extract =
   val dirs = Paths.get("dataset-family").toFile.listFiles
 
-  val avgFeatures = label2Features(dirs).par.map {
+  val avgFeatures = label2Features(dirs).map {
     (label, features) => 
       val count = features.length
       println(s"label = $label, files count = $count")
