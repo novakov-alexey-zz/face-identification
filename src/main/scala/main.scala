@@ -47,15 +47,17 @@ def drawLabel(label: String, frame: Mat, topLeft: Point) =
   val fontScale = 1.0
   val baseline = new Array[Int](2)
   val size = getTextSize(label, font, fontScale, thickness, baseline)
+  val rectColor = Scalar(255, 0, 0, 0)
   rectangle(
     frame,
     Point(x, y - size.height() - thickness),
-    Point(x + size.width() - thickness, y),
-    Scalar(255, 0, 0, 0),
+    Point(x + size.width() - thickness, y + 10),
+    rectColor,
     CV_FILLED,
     LINE_8,
     0)
-  putText(frame, label, Point(x, y), font, fontScale, Scalar(0, 255, 0, 0), thickness, CV_FILLED, false)
+  val fontColor = Scalar(0, 255, 0, 0)
+  putText(frame, label, Point(x, y), font, fontScale, fontColor, thickness, CV_FILLED, false)
 
 val faceCascade = CascadeClassifier("cv2_cascades/haarcascades/haarcascade_frontalface_alt2.xml")
 
