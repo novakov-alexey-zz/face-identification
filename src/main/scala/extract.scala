@@ -3,7 +3,6 @@ import org.emergentorder.compiletime.*
 import org.emergentorder.onnx.Tensors.*
 import org.emergentorder.onnx.backends.*
 import org.bytedeco.opencv.global.opencv_imgcodecs.*
-import org.bytedeco.opencv.global.opencv_core.*
 import org.bytedeco.opencv.opencv_core.{Mat, Scalar}
 
 import java.nio.file.{Files, Paths}

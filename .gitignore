@@ -14,7 +14,6 @@ dataset*
 test_family_images
 model_folds
 plot_images/
-model_colab
 *.pickle
 .env
 data/

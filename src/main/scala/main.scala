@@ -24,13 +24,6 @@ def createCavasFrame =
   frame.setCanvasSize(1280, 720)
   frame
 
-def toGrey(img: Mat) =
-  val grey = UMat()
-  img.copyTo(grey)
-  cvtColor(grey, grey, COLOR_BGR2GRAY)
-  equalizeHist(grey, grey)
-  grey
-
 def calcLabel(face: Array[Float], features: Features, threshold: Int = 100) = 
   features.foldLeft("?", Float.MaxValue){ 
     case ((label, min), (l, f)) => 
@@ -58,14 +51,6 @@ def drawLabel(label: String, frame: Mat, topLeft: Point) =
     0)
   val fontColor = Scalar(0, 255, 0, 0)
   putText(frame, label, Point(x, y), font, fontScale, fontColor, thickness, CV_FILLED, false)
-
-val faceCascade = CascadeClassifier("cv2_cascades/haarcascades/haarcascade_frontalface_alt2.xml")
-
-def detectFaces(frame: Mat) =
-  val grey = toGrey(frame)
-  val faces = RectVector()
-  faceCascade.detectMultiScale(grey, faces)
-  faces
 
 def toModelInput(crop: Rect, frame: Mat) =
   val cropped = Mat(frame, crop)

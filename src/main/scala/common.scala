@@ -2,7 +2,9 @@ import io.kjaer.compiletime.*
 
 import org.bytedeco.javacpp.indexer.{UByteIndexer, FloatRawIndexer}
 import org.bytedeco.opencv.global.opencv_core.*
-import org.bytedeco.opencv.opencv_core.{Mat, Scalar}
+import org.bytedeco.opencv.opencv_core.{Mat, Scalar, RectVector, UMat}
+import org.bytedeco.opencv.global.opencv_imgproc.*
+import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier
 
 import org.emergentorder.compiletime.*
 import org.emergentorder.onnx.Tensors.*
@@ -18,6 +20,8 @@ val ImageWidth = 224
 val ImageHeight = 224
 val Channels = 3
 val OutputSize: Dimension = 512
+
+val faceCascade = CascadeClassifier("cv2_cascades/haarcascades/haarcascade_frontalface_alt2.xml")
 
 def shape(batch: Int) =
   batch #: ImageHeight #: ImageWidth #: Channels #: SNil
@@ -65,3 +69,16 @@ def saveFeatures(features: Features) =
 def loadFeatures: Features =
   val featureBytes = Files.readAllBytes(Paths.get(featureFilePath))
   Cbor.decode(featureBytes).to[Features].value
+
+def toGrey(img: Mat) =
+  val grey = UMat()
+  img.copyTo(grey)
+  cvtColor(grey, grey, COLOR_BGR2GRAY)
+  equalizeHist(grey, grey)
+  grey
+
+def detectFaces(img: Mat): RectVector =
+  val grey = toGrey(img)
+  val faces = RectVector()
+  faceCascade.detectMultiScale(grey, faces)
+  faces  
