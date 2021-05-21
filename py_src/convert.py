@@ -32,7 +32,7 @@ def saved_model(output_path: str):
                     include_top=False,
                     input_shape=(IMAGE_HEIGHT, IMAGE_WIDTH, COLOR_CHANNELS),
                     pooling='avg')
-    # model.save(output_path)
+    model.save(output_path)
     model.summary()
 
 

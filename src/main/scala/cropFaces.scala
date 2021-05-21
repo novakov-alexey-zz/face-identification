@@ -17,7 +17,7 @@ def crop() =
 
   for dir <- dirs do
     val label = dir.getName
-    println(s"Extraction images for $label label")
+    println(s"Extracting faces for '$label' label")
 
     createIfNotExists(Paths.get(datasetDir, label).toString)
     val images = dir.listFiles.filter(_.toString.endsWith(".jpg"))
