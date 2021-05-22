@@ -32,7 +32,7 @@ def label2Features(dirs: Array[File]) =
 
 @main
 def extract =
-  val dirs = Paths.get("dataset-family").toFile.listFiles
+  val dirs = Paths.get("dataset-people").toFile.listFiles
 
   val avgFeatures = label2Features(dirs).map {
     (label, features) => 

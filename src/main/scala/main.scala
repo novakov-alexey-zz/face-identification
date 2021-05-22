@@ -1,22 +1,9 @@
-import org.emergentorder.onnx.Tensors.*
-import org.emergentorder.onnx.backends.*
-import org.emergentorder.compiletime.*
-import io.kjaer.compiletime.*
-
-import org.bytedeco.opencv.opencv_core.{Mat, Size, UMat, RectVector, Rect, Point, Scalar}
-import org.bytedeco.opencv.global.opencv_core.*
+import org.bytedeco.opencv.opencv_core.{Mat, Size, Rect, Point, Scalar}
 import org.bytedeco.opencv.global.opencv_imgproc.*
-import org.bytedeco.opencv.opencv_videoio.*
-import org.bytedeco.opencv.global.opencv_imgcodecs.*
+import org.bytedeco.opencv.opencv_videoio.VideoCapture
 import org.bytedeco.javacv.{CanvasFrame, OpenCVFrameConverter}
-import org.bytedeco.opencv.opencv_objdetect.*
-import io.bullet.borer.Cbor
 
-import scala.collection.mutable.ArrayBuffer
-import java.nio.file.{Files, Paths}
-import java.awt.event.KeyEvent
-import javax.swing.{JFrame, WindowConstants}
-import java.nio.ByteBuffer
+import javax.swing.WindowConstants
 
 def createCavasFrame = 
   val frame = CanvasFrame("Detected Faces")

@@ -60,14 +60,14 @@ def distance(a: Array[Float], b: Array[Float]): Float =
   math.sqrt(a.zip(b).map((a, b) => math.pow(a - b, 2)).sum).toFloat
 
 type Features = Map[String, Array[Float]]
-val featureFilePath = "data/precomputed_features.cbor"
+val FeatureFilePath = "data/precomputed_features.cbor"
 
 def saveFeatures(features: Features) =
-  val file = File(featureFilePath)
+  val file = File(FeatureFilePath)
   Cbor.encode(features).to(file).result
 
 def loadFeatures: Features =
-  val featureBytes = Files.readAllBytes(Paths.get(featureFilePath))
+  val featureBytes = Files.readAllBytes(Paths.get(FeatureFilePath))
   Cbor.decode(featureBytes).to[Features].value
 
 def toGrey(img: Mat) =
