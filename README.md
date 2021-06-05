@@ -6,7 +6,9 @@ fast on thousands faces due to O(n) complexity, where `n` is a number of labels.
 
 ## Scala Version
 
-See modules:
+Arcticle descring the approach to identify faces: [Face Identification with VGGFace and OpenCV](https://novakov-alexey.github.io/face-identification/)
+
+See modules here:
 
 - [src/main/scala](src/main/scala)
 
