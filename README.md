@@ -4,6 +4,13 @@ This example is based on [VGGFace](https://github.com/rcmalli/keras-vggface) mod
 Real-time image then compared with every pre-computed label features. I suspect, it won't work
 fast on thousands faces due to O(n) complexity, where `n` is a number of labels.
 
+## Scala Version
+
+See modules:
+
+- [src/main/scala](src/main/scala)
+
+## Python Version
 See main two scripts for details:
 
 -   [src/extract_features.py](src/extract_features.py)
